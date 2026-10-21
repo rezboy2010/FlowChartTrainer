@@ -1,0 +1,58 @@
+name: Deploy Blazor to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "github-pages"
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download sources
+        uses: actions/checkout@v6
+
+      - name: Install .NET 10 SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Check calculations and state
+        run: dotnet run --project tests/FlowchartTrainer.Tests/FlowchartTrainer.Tests.csproj -c Release
+
+      - name: Build application
+        run: dotnet publish src/FlowchartTrainer.Web/FlowchartTrainer.Web.csproj -c Release -o published
+
+      - name: Prepare application path
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: |
+          sed -i "s|<base href=\"/\" />|<base href=\"${PAGES_BASE_PATH}/\" />|" published/wwwroot/index.html
+          touch published/wwwroot/.nojekyll
+
+      - name: Upload website
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: published/wwwroot
+          include-hidden-files: true
+
+      - name: Publish website
+        id: deployment
+        uses: actions/deploy-pages@v4
