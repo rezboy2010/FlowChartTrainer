@@ -1,0 +1,104 @@
+<div class="page-container practice-page">
+    <div class="page-heading"><div><p class="eyebrow">ПОДБОР ВХОДНЫХ ДАННЫХ</p><h1>Практика</h1><p class="muted">Сначала выбери начальное x. Затем вычисляй y и выбирай ветви схемы.</p></div><span class="page-index">03 / ПРАКТИКА</span></div>
+    <div class="task-tabs" role="group" aria-label="Выбор практической задачи">
+        @for (var i = 0; i < TaskCatalog.All.Count; i++)
+        {
+            var index = i; var task = TaskCatalog.All[index];
+            <button class="task-tab @(Session.Task.Id == task.Id ? "selected" : "")" aria-pressed="@(Session.Task.Id == task.Id)" @onclick="() => Session.SelectTask(task)"><span class="task-number">0@(index + 1)</span><span><strong>@task.Title</strong><small>@task.Subtitle</small></span><span class="tab-arrow">↗</span></button>
+        }
+    </div>
+    <div class="goal-banner"><span class="goal-icon" aria-hidden="true">◎</span><div><span class="eyebrow">ТВОЯ ЦЕЛЬ</span><h2>@Session.Task.Goal.Description</h2><p>@Session.Task.RangeDescription</p></div></div>
+    <div class="workspace">
+        <section class="diagram-panel" aria-label="Блок-схема задачи">
+            <div class="panel-heading"><strong>Блок-схема</strong><span class="mono">@Session.Task.Id.ToUpperInvariant()</span></div>
+            <div class="diagram-legend"><span><i class="legend-current"></i>Текущий шаг</span><span><i class="legend-visited"></i>✓ Пройдено</span>@if(Session.Task.Goal is BranchGoal){<span><i class="legend-target"></i>Целевая ветвь</span>}</div>
+            <div class="diagram-scroll" tabindex="0" role="region" aria-label="Блок-схема. На узком экране прокручивается по горизонтали"><FlowDiagram Task="Session.Task" CurrentNodeId="@Session.CurrentStep?.NodeId" VisitedNodeIds="VisitedNodes" CompletedSteps="CompletedSteps" /></div>
+            <div class="diagram-caption">В прямоугольнике «y = …» означает: вычисли правую часть и запиши результат в y.</div>
+        </section>
+        <aside class="control-column" aria-label="Ввод и пошаговый разбор">
+            <section class="input-panel">
+                <div class="panel-heading"><strong>1. Подбери начальное число</strong></div>
+                <p class="input-purpose">Введи здесь <strong>начальное x</strong>. Значения y будешь вычислять в разборе ниже.</p>
+                <label for="practice-input">Начальное число x</label>
+                <div class="input-row"><input id="practice-input" type="text" inputmode="numeric" autocomplete="off" maxlength="24" placeholder="Твоё начальное число" value="@Session.InputText" @oninput="OnInput" @onkeydown="OnInputKey" aria-describedby="input-help input-error" aria-invalid="@(Session.InputError.Length > 0 ? "true" : "false")" /><button class="button primary" @onclick="SessionBegin">Разобрать число</button></div>
+                <p id="input-help" class="tiny muted">@Session.Task.RangeDescription. Изменение x начинает новую попытку.</p>
+                @if(Session.InputError.Length > 0){<p id="input-error" class="feedback error" role="alert">! @Session.InputError</p>}
+            </section>
+            @if(Session.CurrentStep is { } step)
+            {
+                <section class="step-panel">
+                    <div class="step-top"><span class="eyebrow">2. ПРОЙДИ СХЕМУ</span><span class="mono">Шаг @Session.DisplayStepNumber / @Session.DisplayStepCount</span></div>
+                    <progress class="step-progress" value="@Session.DisplayStepNumber" max="@Session.DisplayStepCount" aria-label="Прогресс разбора"></progress>
+                    <div class="live-step" aria-live="polite" aria-atomic="true">
+                        <h2 @ref="_stepHeading" tabindex="-1">@step.Title</h2>
+                        <div class="formula-card"><span class="tiny">ТЕКУЩИЙ БЛОК</span><div class="formula">@step.Formula</div>@if(step.Substitution.Length > 0){<span class="tiny">С ТВОИМИ ЧИСЛАМИ</span><div class="substitution">@step.Substitution @if(Session.IsChecked && step.AnswerKind == AnswerKind.Number){<span>= @step.ExpectedNumber</span>}</div>}</div>
+                        @if (step.AnswerKind == AnswerKind.None || Session.IsChecked)
+                        {
+                            <p class="step-explanation">@step.Explanation</p>
+                        }
+                        else if (step.AnswerKind == AnswerKind.Number)
+                        {
+                            <p class="step-explanation">Вычисли выражение с подставленными числами. Введи получившееся <strong>новое y</strong> в поле ниже.</p>
+                        }
+                        else
+                        {
+                            <p class="step-explanation">Посмотри на сравнение выше. Если оно верное — выбери <strong>«Да»</strong>, иначе — <strong>«Нет»</strong>. Затем проверь выбор.</p>
+                        }
+                    </div>
+                    @if(step.AnswerKind == AnswerKind.Number && !Session.IsChecked)
+                    {
+                        <div class="answer-zone">
+                            <label for="step-answer">Какое новое значение получит y?</label>
+                            <div class="answer-entry"><input @ref="_answerInput" id="step-answer" type="text" inputmode="numeric" autocomplete="off" maxlength="24" @bind="Session.StepAnswer" @bind:event="oninput" @onkeydown="OnAnswerKey" placeholder="Введи результат вычисления" aria-describedby="answer-help" /><button class="button primary" @onclick="Session.Check">Проверить вычисление</button></div>
+                            <p id="answer-help" class="tiny">Это ответ на текущее действие. Начальное x менять не нужно.</p>
+                        </div>
+                    }
+                    @if(step.AnswerKind == AnswerKind.Branch && !Session.IsChecked)
+                    {
+                        <div class="answer-zone"><p class="answer-label">По какой ветви пойдёт схема?</p><div class="branch-options" role="group" aria-label="Выбери ветвь"><button class="branch-button @(Session.SelectedBranch == true ? "chosen" : "")" aria-pressed="@(Session.SelectedBranch == true)" @onclick="() => Session.SelectedBranch = true"><span>↙</span> Да</button><button class="branch-button @(Session.SelectedBranch == false ? "chosen" : "")" aria-pressed="@(Session.SelectedBranch == false)" @onclick="() => Session.SelectedBranch = false">Нет <span>↘</span></button></div><button class="button primary branch-check" @onclick="Session.Check">Проверить ветвь</button></div>
+                    }
+                    @if(Session.Feedback is { } feedback){<p class="feedback @(feedback.IsCorrect ? "success" : "error")" role="status">@(feedback.IsCorrect ? "✓" : "!") @feedback.Message</p>}
+                    <VariablesTable Before="step.Before" After="step.After" Reveal="Session.CanAdvance" />
+                    @if(!Session.IsCompleted)
+                    {
+                        <div class="step-actions"><button class="button secondary compact" disabled="@(Session.StepIndex <= Session.FirstActionIndex)" @onclick="GoBack" aria-label="Предыдущий шаг">← Назад</button><button class="button primary" disabled="@(!Session.CanAdvance)" @onclick="GoNext">@(step.NodeId == "output" ? "Показать итог" : "Дальше →")</button></div>
+                        @if(!Session.CanAdvance){<p class="advance-help tiny muted">Чтобы продолжить, сначала проверь ответ выше.</p>}
+                    }
+                    else
+                    {
+                        <div class="result-card @(Session.Trace!.GoalReached ? "goal-success" : "goal-miss")" role="status"><span class="result-symbol">@(Session.Trace.GoalReached ? "✓" : "↻")</span><h3>@(Session.Trace.GoalReached ? "Число подходит" : "Попробуй другое число")</h3><p>При x = @Session.InputText получено y = @Session.Trace.Output.</p><p>@(Session.Trace.GoalReached ? "Цель задачи достигнута. Проследи ещё раз, почему сработало это число." : "Схема выполнена верно, но цель задачи не достигнута. Измени начальное x в верхнем поле и разбери новую попытку.")</p></div>
+                        <div class="step-actions"><button class="button secondary compact" @onclick="GoBack">← Назад</button><button class="button primary" @onclick="Session.Restart">Новая попытка ↻</button></div>
+                        <button class="text-button solution-toggle" @onclick="() => Session.ShowSolutions = !Session.ShowSolutions">@(Session.ShowSolutions ? "Скрыть подходящие числа" : "Показать все подходящие числа")</button>
+                        @if(Session.ShowSolutions){<div class="solution-list"><p>В заданном диапазоне подходят:</p><strong>@string.Join(", ", SchemeRunner.FindSolutions(Session.Task))</strong><p class="tiny muted">Каждое число проверено выполнением этой же схемы.</p></div>}
+                    }
+                </section>
+                <button class="text-button reset-link" @onclick="Session.Restart">↻ Сбросить разбор</button>
+            }
+            else
+            {
+                <section class="empty-step"><span class="empty-icon" aria-hidden="true">↳</span><h2>Начни с поля x выше</h2><p>Выбери число в указанном диапазоне и нажми <strong>«Разобрать число»</strong>.</p><ol><li>Вводи результаты вычислений в отдельное поле y.</li><li>В условиях нажимай «Да» или «Нет».</li><li>Проверь, подходит ли начальное число для цели.</li></ol></section>
+            }
+        </aside>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public TrainingSession Session { get; set; } = null!;
+    private ElementReference _answerInput, _stepHeading;
+    private bool _focusRequested;
+    private IReadOnlyList<ExecutionStep> CompletedSteps => Session.Trace?.Steps.Take(Session.StepIndex + (Session.CanAdvance ? 1 : 0)).ToArray() ?? [];
+    private IReadOnlySet<string> VisitedNodes => CompletedSteps.Select(s => s.NodeId).ToHashSet();
+    private void OnInput(ChangeEventArgs e) => Session.SetInput(e.Value?.ToString() ?? "");
+    private void SessionBegin() { _focusRequested = Session.BeginAtFirstAction(); }
+    private void GoNext() { Session.Next(); _focusRequested = true; }
+    private void GoBack() { Session.Back(); _focusRequested = true; }
+    private void OnInputKey(KeyboardEventArgs e) { if(e.Key == "Enter") SessionBegin(); }
+    private void OnAnswerKey(KeyboardEventArgs e) { if(e.Key == "Enter") Session.Check(); }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(!_focusRequested || Session.CurrentStep is null) return;
+        _focusRequested = false;
+        if(Session.CurrentStep.AnswerKind == AnswerKind.Number && !Session.IsChecked) await _answerInput.FocusAsync();
+        else await _stepHeading.FocusAsync();
+    }
+}

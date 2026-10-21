@@ -1,0 +1,43 @@
+<div class="page-container theory-page">
+    <div class="page-heading"><div><p class="eyebrow">ОСНОВЫ И ПРИМЕРЫ</p><h1>Как читать блок-схему</h1><p class="muted">Следи за стрелками и используй значения, полученные на предыдущем шаге.</p></div><span class="page-index">01 / ТЕОРИЯ</span></div>
+    <section class="theory-intro"><div><span class="chapter-number">01</span><h2>У каждой фигуры своя роль</h2><p>Читаем схему от «Начала» до «Конца». Прямоугольник изменяет значения, ромб выбирает путь. После условия выполняется только одна ветвь.</p></div><div class="shape-grid">
+        <div class="shape-card"><svg viewBox="0 0 160 80" role="img" aria-label="Овал"><ellipse cx="80" cy="40" rx="61" ry="25" /><text x="80" y="45" text-anchor="middle">Начало</text></svg><strong>Овал</strong><span>Начало и конец</span></div>
+        <div class="shape-card"><svg viewBox="0 0 160 80" role="img" aria-label="Прямоугольник"><rect x="15" y="15" width="130" height="50" rx="4" /><text x="80" y="45" text-anchor="middle">y = x + 3</text></svg><strong>Прямоугольник</strong><span>Вычисление и присваивание</span></div>
+        <div class="shape-card"><svg viewBox="0 0 160 80" role="img" aria-label="Ромб"><polygon points="80,6 149,40 80,74 11,40" /><text x="80" y="45" text-anchor="middle">y &gt; 9?</text></svg><strong>Ромб</strong><span>Условие: «Да» или «Нет»</span></div>
+        <div class="shape-card"><svg viewBox="0 0 160 80" role="img" aria-label="Параллелограмм"><polygon points="30,15 150,15 130,65 10,65" /><text x="80" y="45" text-anchor="middle">Ввод x</text></svg><strong>Параллелограмм</strong><span>Ввод или вывод</span></div>
+    </div></section>
+    <section class="rule-grid">
+        <article class="rule-card"><span class="chapter-number">02</span><h2>Присваивание меняет значение</h2><p>В записи <code>y = y − 3</code> сначала считаем правую часть со старым y, затем записываем результат в переменную.</p><div class="rule-formula">y = 11 <span>→</span> 11 − 3 <span>→</span> y = 8</div><p class="tiny muted">В прямоугольных блоках знак = означает команду записать новое значение в переменную. Например, y = y − 3 уменьшает прежнее y на 3.</p></article>
+        <article class="rule-card"><span class="chapter-number">03</span><h2>Проверяй границу условия</h2><p>При y = 9 условие <code>y &gt; 9</code> ложно, а <code>y ≥ 9</code> истинно. Знак равенства меняет выбор ветви.</p><div class="comparison-pills"><span>9 &gt; 9 → Нет</span><span>9 ≥ 9 → Да</span></div><p class="tiny muted">Ромб сам по себе не меняет значения переменных.</p></article>
+    </section>
+    <section class="reverse-rule"><div><span class="chapter-number">04</span><h2>Как подобрать входное число</h2></div><ol><li>Прочитай цель: какая ветвь или результат нужны.</li><li>Посмотри, как x влияет на переменную в условии.</li><li>Выбери целое x в указанном диапазоне.</li><li>Пройди всю схему и проверь предположение.</li></ol><p>Например, для <code>y = 2 × x + 1</code> ветвь «Да» условия <code>y &gt; 9</code> требует <code>2 × x + 1 &gt; 9</code>, то есть <code>x &gt; 4</code>. Затем учитываем диапазон задачи. Подходящих чисел может быть несколько.</p><p class="tiny muted">В этих задачах x и y — целые числа без физических единиц измерения. Выполняй арифметические действия в порядке, указанном в схеме.</p></section>
+    <section class="examples-section" aria-labelledby="examples-title">
+        <div class="section-heading"><div><p class="eyebrow">ПРОСЛЕДИ ВЫПОЛНЕНИЕ</p><h2 id="examples-title">Три разобранных примера</h2></div></div>
+        <div class="example-tabs" role="group" aria-label="Примеры"><button class="@(_example == 0 ? "selected" : "")" aria-pressed="@(_example == 0)" @onclick="() => SelectExample(0)">01 · Простой</button><button class="@(_example == 1 ? "selected" : "")" aria-pressed="@(_example == 1)" @onclick="() => SelectExample(1)">02 · Два условия</button><button class="@(_example == 2 ? "selected" : "")" aria-pressed="@(_example == 2)" @onclick="() => SelectExample(2)">03 · Разбор ошибки</button></div>
+        <div class="example-workspace">
+            <div class="example-diagram"><FlowDiagram Task="ExampleTask" CurrentNodeId="@ExampleStep.NodeId" VisitedNodeIds="ExampleVisited" CompletedSteps="ExampleCompleted" ShowGoal="false" /></div>
+            <div class="example-description"><span class="eyebrow">x = @ExampleInput · ШАГ @(_step + 1) / @ExampleTrace.Steps.Count</span><h3>@ExampleTitle</h3>
+                @if(_example == 2){<div class="mistake-note"><strong>Типичная ошибка</strong><p>В условии y &gt; 10 сравнивают с 10 именно y. Подставить туда исходное x = 5 — ошибка. Перед проверкой y уже равно 11.</p></div>}
+                <h4>@ExampleStep.Title</h4><div class="formula-card"><div class="formula">@ExampleStep.Formula</div><div class="substitution">@ExampleStep.Substitution</div>@if(ExampleStep.ExpectedNumber is { } number){<div class="example-answer">Получаем @number</div>}</div><p>@ExampleStep.Explanation</p>
+                <VariablesTable Before="ExampleStep.Before" After="ExampleStep.After" Reveal="true" />
+                <div class="step-actions"><button class="button secondary compact" disabled="@(_step == 0)" @onclick="() => _step--">← Назад</button><button class="button primary" disabled="@(_step == ExampleTrace.Steps.Count - 1)" @onclick="() => _step++">Следующий шаг →</button></div>
+                @if(_step == ExampleTrace.Steps.Count - 1){<p class="feedback success">✓ При x = @ExampleInput схема выводит @ExampleTrace.Output.</p><button class="text-button" @onclick="() => _step = 0">Повторить пример ↻</button>}
+                <p class="tiny muted">В примерах все вычисления показаны. В практике значения и ветви выбираешь ты.</p>
+            </div>
+        </div>
+    </section>
+    <div class="next-section"><div><h2>Готов проверить себя?</h2><p class="muted">Пять вопросов помогут закрепить основные правила.</p></div><button class="button primary" @onclick="() => OnNavigate.InvokeAsync(App.Section.Quiz)">Перейти к тесту →</button></div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<App.Section> OnNavigate { get; set; }
+    private int _example, _step;
+    private TrainingTask ExampleTask => TaskCatalog.All[_example];
+    private int ExampleInput => _example == 1 ? 1 : 5;
+    private ExecutionTrace ExampleTrace { get; set; } = SchemeRunner.Run(TaskCatalog.All[0], 5);
+    private ExecutionStep ExampleStep => ExampleTrace.Steps[_step];
+    private IReadOnlyList<ExecutionStep> ExampleCompleted => ExampleTrace.Steps.Take(_step + 1).ToArray();
+    private IReadOnlySet<string> ExampleVisited => ExampleCompleted.Select(s => s.NodeId).ToHashSet();
+    private string ExampleTitle => _example switch { 0 => "Одно условие: какой путь выберет x = 5", 1 => "Два условия: используем обновлённое y", _ => "Проверяем y, а не исходное x" };
+    private void SelectExample(int index) { _example = index; _step = 0; ExampleTrace = SchemeRunner.Run(ExampleTask, ExampleInput); }
+}

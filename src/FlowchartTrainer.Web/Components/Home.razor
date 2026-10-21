@@ -1,0 +1,34 @@
+<div class="page-container home-page">
+    <section class="hero">
+        <div class="hero-copy">
+            <p class="eyebrow"><span class="status-dot"></span> ТРЕНАЖЁР ПО ИНФОРМАТИКЕ</p>
+            <h1>Найди число.<br /><span>Проследи путь.</span></h1>
+            <p class="hero-description">Научись читать блок-схемы и подбирать входные данные. Проверяй условия, считай значения и следи за каждым изменением.</p>
+            <div class="button-row"><button class="button primary" @onclick="() => OnNavigate.InvokeAsync(App.Section.Practice)">Начать практику <span aria-hidden="true">↗</span></button><button class="button secondary" @onclick="() => OnNavigate.InvokeAsync(App.Section.Theory)">Сначала теория</button></div>
+            <div class="hero-facts"><div><strong>03</strong><span>готовые схемы</span></div><div><strong>1–2</strong><span>условия в задаче</span></div><div><strong>Шаг за шагом</strong><span>с понятным разбором</span></div></div>
+        </div>
+        <div class="hero-preview">
+            <div class="preview-top"><span class="preview-dot"></span> Путь зависит от твоего числа <span class="mono">x = 5</span></div>
+            <div class="mini-diagram" aria-label="Пример: x = 5, y = 11, условие y больше 9 истинно">
+                <div class="mini-node pill">Начало</div><span class="mini-connector">↓</span>
+                <div class="mini-node">x = 5 <span>→</span> y = 2 × 5 + 1 = 11</div><span class="mini-connector">↓</span>
+                <div class="mini-condition"><span>11 &gt; 9?</span></div>
+                <div class="mini-branches"><span class="mini-yes">↙ Да</span><span>Нет ↘</span></div>
+                <div class="mini-result"><span class="check-icon">✓</span><div><strong>Нужная ветвь найдена</strong><span>Условие истинно — идём по стрелке «Да».</span></div></div>
+            </div>
+            <div class="preview-bottom"><span class="status-dot"></span> Здесь видно, почему получился ответ</div>
+        </div>
+    </section>
+    <section class="learning-path" aria-labelledby="path-title">
+        <div class="section-heading"><div><p class="eyebrow">КАК РАБОТАТЬ</p><h2 id="path-title">От условия к решению</h2></div><span class="muted">Выбери, с чего начать</span></div>
+        <div class="path-grid">
+            <button class="path-card" @onclick="() => OnNavigate.InvokeAsync(App.Section.Theory)"><span class="card-number">01 / РАЗОБРАТЬСЯ</span><h3>Теория и примеры <span>↗</span></h3><p>Фигуры, присваивание и выбор ветви. Три примера, включая разбор ошибки.</p><span class="card-link">Открыть теорию →</span></button>
+            <button class="path-card" @onclick="() => OnNavigate.InvokeAsync(App.Section.Quiz)"><span class="card-number">02 / ПРОВЕРИТЬ СЕБЯ</span><h3>Короткий тест <span>↗</span></h3><p>Пять вопросов по основным правилам. После каждого — объяснение ответа.</p><span class="card-link">Пройти тест →</span></button>
+            <button class="path-card accented" @onclick="() => OnNavigate.InvokeAsync(App.Section.Practice)"><span class="card-number">03 / ПОПРОБОВАТЬ</span><h3>Практика <span>↗</span></h3><p>Подбери входное число для нужной ветви или результата. Выполни схему по шагам.</p><span class="card-link">Решить задачу →</span></button>
+        </div>
+    </section>
+    <section class="about-strip"><div><p class="eyebrow">О ПРОЕКТЕ</p><h2>Понимать каждый переход</h2></div><p>Тренажёр помогает увидеть связь между входным числом, условиями и результатом. Все расчёты и проверки написаны на C#. Автор — <strong>Резяпкин Александр</strong>.</p></section>
+    <details class="sources-details"><summary>Источники и использование ИИ</summary><div class="sources-body"><p>Условия и границы проекта — задание учителя «Тема 10. Чтение блок-схем». Учебные задачи составлены для этого приложения.</p><ul><li><a href="https://learn.microsoft.com/ru-ru/dotnet/csharp/language-reference/operators/assignment-operator" target="_blank" rel="noopener noreferrer">Microsoft Learn: оператор присваивания C#</a></li><li><a href="https://learn.microsoft.com/ru-ru/dotnet/csharp/language-reference/operators/comparison-operators" target="_blank" rel="noopener noreferrer">Microsoft Learn: операторы сравнения</a></li><li><a href="https://learn.microsoft.com/ru-ru/aspnet/core/blazor/?view=aspnetcore-10.0" target="_blank" rel="noopener noreferrer">Microsoft Learn: Blazor</a></li></ul><p>ИИ использован для проектирования, подготовки кода, примеров и проверок. Автору предстоит изучить код, проверить работу с одноклассником и защитить архитектуру. Подробности находятся в документации проекта.</p></div></details>
+</div>
+
+@code { [Parameter] public EventCallback<App.Section> OnNavigate { get; set; } }

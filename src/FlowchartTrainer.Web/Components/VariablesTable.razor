@@ -1,0 +1,26 @@
+<div class="variables-block">
+    <h3>Переменные</h3>
+    <table class="variables-table">
+        <caption class="sr-only">Значения до и после текущего действия</caption>
+        <thead><tr><th>Имя</th><th>Было</th><th>Стало</th></tr></thead>
+        <tbody>
+            @foreach (var variable in new[] { "x", "y" })
+            {
+                var before = Before.TryGetValue(variable, out var b) ? b.ToString() : "—";
+                var after = After.TryGetValue(variable, out var a) ? a.ToString() : "—";
+                var changed = Reveal && before != after;
+                <tr class="@(changed ? "changed-row" : "")">
+                    <th scope="row">@variable</th><td>@before</td>
+                    <td>@(Reveal ? after : before) @if(changed){<span class="changed-label">↻ изменилось</span>}</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <p class="tiny muted">«—» означает, что значение ещё не задано.</p>
+</div>
+
+@code {
+    [Parameter] public IReadOnlyDictionary<string,long> Before { get; set; } = new Dictionary<string,long>();
+    [Parameter] public IReadOnlyDictionary<string,long> After { get; set; } = new Dictionary<string,long>();
+    [Parameter] public bool Reveal { get; set; }
+}

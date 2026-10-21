@@ -1,0 +1,33 @@
+<div class="page-container quiz-page">
+    <div class="page-heading"><div><p class="eyebrow">ПРОВЕРКА ОСНОВ</p><h1>Короткий тест</h1><p class="muted">Один ответ в каждом вопросе. Объяснение появится после проверки.</p></div><span class="page-index">02 / ТЕСТ</span></div>
+    <div class="quiz-layout">
+        <aside class="quiz-side"><span class="chapter-number">?</span><h2>Сначала подумай.<br />Потом проверь.</h2><p>Здесь важны порядок действий, границы условий и текущее значение переменной.</p><div class="quiz-step-list">@for(var i=0;i<QuizCatalog.All.Count;i++){<span class="@(i < Session.Index || Session.IsCompleted ? "done" : i == Session.Index ? "current" : "")">@(i < Session.Index || Session.IsCompleted ? "✓" : (i+1).ToString())</span>}</div><p class="tiny muted">Результат сохранится при переходе между разделами до перезагрузки страницы.</p></aside>
+        <section class="quiz-card">
+            @if(Session.IsCompleted)
+            {
+                <div class="quiz-result" role="status"><span class="eyebrow">ТЕСТ ЗАВЕРШЁН</span><div class="quiz-score">@Session.Score<span> / @QuizCatalog.All.Count</span></div><h2>@(Session.Score == 5 ? "Основы усвоены" : Session.Score >= 3 ? "Хорошая основа для практики" : "Закрепи правила на примерах")</h2><p>@(Session.Score == 5 ? "Переходи к подбору входных данных и объясняй каждый переход." : "Вернись к теории и обрати внимание на присваивание и знаки сравнения.")</p><div class="button-row"><button class="button primary" @onclick="() => OnNavigate.InvokeAsync(App.Section.Practice)">К практике →</button><button class="button secondary" @onclick="Session.Reset">Пройти заново</button></div></div>
+            }
+            else
+            {
+                <div class="quiz-meta"><span class="eyebrow">ВОПРОС @(Session.Index+1) ИЗ @QuizCatalog.All.Count</span><span class="mono">@Session.Score верно</span></div>
+                <progress class="step-progress" value="@Session.Index" max="@QuizCatalog.All.Count" aria-label="Прогресс теста"></progress>
+                <h2>@Session.Current.Prompt</h2>
+                <fieldset class="quiz-options" disabled="@Session.IsChecked"><legend class="sr-only">Выбери один ответ</legend>
+                    @for(var i=0;i<Session.Current.Options.Count;i++)
+                    {
+                        var index=i;
+                        var resultClass=Session.IsChecked && index==Session.Current.CorrectIndex ? "correct" : Session.IsChecked && index==Session.SelectedOption ? "incorrect" : "";
+                        <label class="quiz-option @(Session.SelectedOption == index ? "selected" : "") @resultClass"><input type="radio" name="quiz-answer" value="@index" checked="@(Session.SelectedOption == index)" @onchange="() => Session.SelectedOption=index" /><span>@Session.Current.Options[index]</span>@if(Session.IsChecked && index==Session.Current.CorrectIndex){<strong aria-label="Правильный ответ">✓</strong>}else if(Session.IsChecked && index==Session.SelectedOption){<strong aria-label="Неправильный ответ">×</strong>}</label>
+                    }
+                </fieldset>
+                @if(Session.IsChecked){<div class="quiz-explanation @(Session.IsCorrect ? "success" : "error")" role="status"><strong>@(Session.IsCorrect ? "✓ Верно" : "! Разберём ответ")</strong><p>@Session.Current.Explanation</p></div><button class="button primary" @onclick="Session.Next">@(Session.Index == QuizCatalog.All.Count - 1 ? "Посмотреть результат →" : "Следующий вопрос →")</button>}
+                else{<button class="button primary" disabled="@(Session.SelectedOption is null)" @onclick="Session.Check">Проверить ответ</button>}
+            }
+        </section>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public QuizSession Session { get; set; } = null!;
+    [Parameter] public EventCallback<App.Section> OnNavigate { get; set; }
+}

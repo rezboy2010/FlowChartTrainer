@@ -1,0 +1,45 @@
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+<header class="site-header">
+    <div class="header-inner">
+        <button class="brand" @onclick="() => Navigate(Section.Home)" aria-label="Чтение блок-схем — главная">
+            <span class="brand-symbol" aria-hidden="true">◇</span><span>Чтение<br /><strong>блок-схем</strong></span>
+        </button>
+        <nav aria-label="Основная навигация">
+            @foreach (var section in Enum.GetValues<Section>())
+            {
+                <button class="nav-item @(_section == section ? "active" : "")" aria-current="@(_section == section ? "page" : null)" @onclick="() => Navigate(section)">@Label(section)</button>
+            }
+        </nav>
+        <span class="header-badge">Учебный проект <span>2026</span></span>
+    </div>
+</header>
+<main id="main" tabindex="-1">
+    <ErrorBoundary>
+        <ChildContent>
+            @switch (_section)
+            {
+                case Section.Home: <Home OnNavigate="Navigate" /> break;
+                case Section.Theory: <Theory OnNavigate="Navigate" /> break;
+                case Section.Quiz: <Quiz Session="_quiz" OnNavigate="Navigate" /> break;
+                case Section.Practice: <Practice Session="_practice" /> break;
+            }
+        </ChildContent>
+        <ErrorContent><div class="error-card"><h1>Не удалось продолжить</h1><p>Перезагрузи страницу, чтобы начать заново.</p><a href="">Перезагрузить</a></div></ErrorContent>
+    </ErrorBoundary>
+</main>
+<footer class="site-footer">
+    <div><strong>Чтение блок-схем</strong><span>Резяпкин Александр · 2026</span></div>
+    <p>C# · Blazor WebAssembly <span class="footer-separator">/</span> Прогресс хранится до перезагрузки страницы.</p>
+</footer>
+
+@code {
+    public enum Section { Home, Theory, Quiz, Practice }
+    private Section _section;
+    private readonly TrainingSession _practice = new(TaskCatalog.All[0]);
+    private readonly QuizSession _quiz = new();
+    private void Navigate(Section section) => _section = section;
+    private static string Label(Section section) => section switch
+    {
+        Section.Home => "Главная", Section.Theory => "Теория", Section.Quiz => "Тест", _ => "Практика"
+    };
+}

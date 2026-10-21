@@ -1,0 +1,61 @@
+<svg class="flow-diagram" viewBox="@($"0 0 720 {Task.DiagramHeight}")" role="img" aria-labelledby="@($"title-{_id}")">
+    <title id="@($"title-{_id}")">Блок-схема «@Task.Title». Подробное описание текущего шага находится рядом.</title>
+    <defs>
+        <marker id="@($"arrow-{_id}")" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M1 1 L9 5 L1 9" fill="none" stroke="context-stroke" stroke-width="1.5" />
+        </marker>
+    </defs>
+    @foreach (var edge in Task.Edges)
+    {
+        var passed = IsPassedEdge(edge);
+        var target = IsTargetEdge(edge);
+        <g class="@(passed ? "edge passed-edge" : "edge")">
+            @if (target) { <path class="target-edge" d="@edge.Path" /> }
+            <path d="@edge.Path" marker-end="@($"url(#arrow-{_id})")" />
+            @if (edge.Label is not null)
+            {
+                <g><text x="@edge.LabelX" y="@edge.LabelY" class="edge-label">@edge.Label</text></g>
+                @if (target) { <g><text x="@edge.LabelX" y="@(edge.LabelY - 20)" class="target-label">Цель</text></g> }
+            }
+        </g>
+    }
+    @foreach (var node in Task.Nodes)
+    {
+        var current = node.Id == CurrentNodeId;
+        var visited = VisitedNodeIds.Contains(node.Id);
+        var css = $"scheme-node {(current ? "current-node" : visited ? "visited-node" : "")} {(node is DecisionNode ? "decision-node" : "")}";
+        <g class="@css" transform="@($"translate({node.X} {node.Y})")">
+            <title>@node.Label @(current ? "— текущий шаг" : visited ? "— пройдено" : "")</title>
+            @switch (node)
+            {
+                case StartNode or EndNode:
+                    <ellipse rx="78" ry="27" />
+                    break;
+                case InputNode or OutputNode:
+                    <polygon points="-86,-27 110,-27 86,27 -110,27" />
+                    break;
+                case DecisionNode:
+                    <polygon points="0,-52 92,0 0,52 -92,0" />
+                    break;
+                default:
+                    <rect x="-100" y="-27" width="200" height="54" rx="7" />
+                    break;
+            }
+            <text y="@(current ? -8 : 0)" text-anchor="middle" dominant-baseline="central">@node.Label</text>
+            @if (current) { <g><text class="node-status" x="0" y="17" text-anchor="middle">Текущий шаг</text></g> }
+            else if (visited) { <g><text class="node-tick" x="@(node is DecisionNode ? 112 : 124)" y="6">✓</text></g> }
+        </g>
+    }
+</svg>
+
+@code {
+    [Parameter, EditorRequired] public TrainingTask Task { get; set; } = null!;
+    [Parameter] public string? CurrentNodeId { get; set; }
+    [Parameter] public IReadOnlySet<string> VisitedNodeIds { get; set; } = new HashSet<string>();
+    [Parameter] public IReadOnlyList<ExecutionStep> CompletedSteps { get; set; } = [];
+    [Parameter] public bool ShowGoal { get; set; } = true;
+    private readonly string _id = Guid.NewGuid().ToString("N")[..8];
+    private bool IsPassedEdge(SchemeEdge edge) => CompletedSteps.Any(s => s.NodeId == edge.FromId && s.NextNodeId == edge.ToId);
+    private bool IsTargetEdge(SchemeEdge edge) => ShowGoal && Task.Goal is BranchGoal goal
+        && edge.FromId == goal.DecisionId && edge.Label == (goal.ExpectedBranch ? "Да" : "Нет");
+}
