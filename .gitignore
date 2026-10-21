@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+dist/
+.vs/
+*.user
+*.zip
+test-results.json
+published/

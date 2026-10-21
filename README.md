@@ -66,17 +66,15 @@ dotnet run --project tests/FlowchartTrainer.Tests/FlowchartTrainer.Tests.csproj 
 
 Это исполняемые проверки на C# без стороннего тестового фреймворка. При успехе код возврата 0, при ошибке 1. Отчёт: [docs/TEST_RESULTS.md](docs/TEST_RESULTS.md). Сценарий самостоятельного прохождения учеником: [docs/CLASSMATE_TEST.md](docs/CLASSMATE_TEST.md).
 
-## Публикация
+## Публикация через GitHub Pages
 
-Запустить `publish.bat` или:
+Настройка сборки уже включена: `.github/workflows/pages.yml`. В репозитории открыть **Settings → Pages** и выбрать **Source → GitHub Actions**. После загрузки файлов в ветку `main` запустится **Deploy Blazor to GitHub Pages**: установка SDK .NET 10, автоматические проверки, сборка C# и публикация.
 
-```powershell
-dotnet publish src/FlowchartTrainer.Web/FlowchartTrainer.Web.csproj -c Release -o published
-```
+Ожидаемый адрес для репозитория `rezboy2010/FlowChartTrainer`: https://rezboy2010.github.io/FlowChartTrainer/ . Ссылка начнёт работать после успешного завершения Actions; публикация на GitHub пока не проверена из этой среды.
 
-Содержимое `published/wwwroot` целиком размещается на статическом HTTP(S)-хостинге с поддержкой MIME `application/wasm`. Посетителям не нужен установленный .NET. При размещении в подпапке необходимо изменить `<base href="/">` в `wwwroot/index.html` на путь подпапки и пересобрать проект. Подробнее — [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+Путь приложения определяется автоматически из настроек Pages, поэтому локальный запуск через `start.bat` сохраняется. Посетителям не нужен установленный .NET. Инструкция с точными действиями — [PUBLISH_INSTRUCTIONS.txt](PUBLISH_INSTRUCTIONS.txt). Устройство публикации и ограничения — [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-Для оценки 7 требуются общий доступ без регистрации, проверка опубликованной версии в другом браузере/на другом устройстве и другим учеником. Не отмечать эти пункты выполненными без реальной проверки.
+Для оценки 7 необходимо проверить опубликованную версию без регистрации, в другом браузере или на другом устройстве и другим учеником. Заполнять результаты только после реальной проверки.
 
 ## Документация
 
